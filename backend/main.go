@@ -1,6 +1,9 @@
 package main
 
 import (
+	"backend/internal/repository"
+	"backend/internal/service"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -27,7 +30,6 @@ func main() {
 			profile := user.Group("/profile")
 			{
 				profile.GET("/", GetProfileHandler)
-				profile.POST("/", CreateProfileHandler)
 				profile.PATCH("/", UpdateProfileHandler)
 				profile.DELETE("/", DeleteProfileHandler)
 			}
@@ -51,7 +53,15 @@ func RegisterHandler(c *gin.Context) {}
 
 func LogoutHandler(c *gin.Context) {}
 
-func GetProfileHandler(c *gin.Context) {}
+func GetProfileHandler(c *gin.Context) {
+	userID := c.Param("user_id")
+	res := service.NewProfileService(
+		repository.NewUserRepository(),
+	).GetProfile(userID)
+	c.JSON(200, gin.H{
+		"user_id": res,
+	})
+}
 
 func CreateProfileHandler(c *gin.Context) {}
 
