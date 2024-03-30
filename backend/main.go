@@ -1,80 +1,153 @@
 package main
 
 import (
-	"backend/internal/repository"
-	"backend/internal/service"
+	"fmt"
+	"log"
+	"os"
+	"strconv"
+
+	"github.com/akinori-s/bloggr/internal/repository"
+	"github.com/akinori-s/bloggr/internal/service"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
+
+type Application struct {
+	db *gorm.DB
+}
 
 func main() {
 	router := gin.Default()
 
 	router.Use(cors.Default())
 
-	router.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
+	db, err := InitDB()
+	if err != nil {
+		log.Fatalf("failed to connect database: %v", err)
+	}
+	app := Application{db: db}
 
 	api := router.Group("/api")
 	{
-		api.POST("/login", LoginHandler)
-		api.POST("/register", RegisterHandler)
-		api.POST("/logout", LogoutHandler)
+		api.POST("/login", app.LoginHandler)
+		api.POST("/register", app.RegisterHandler)
+		api.POST("/logout", app.LogoutHandler)
 
 		user := api.Group("/:user_id")
 		{
 			profile := user.Group("/profile")
 			{
-				profile.GET("/", GetProfileHandler)
-				profile.PATCH("/", UpdateProfileHandler)
-				profile.DELETE("/", DeleteProfileHandler)
+				profile.GET("/", app.GetProfileHandler)
+				profile.PATCH("/", app.UpdateProfileHandler)
+				profile.DELETE("/", app.DeleteProfileHandler)
 			}
 			blog := api.Group("/blog")
 			{
-				blog.GET("/", GetBlogsHandler)
-				blog.GET("/:id", GetBlogHandler)
-				blog.POST("/:id", CreateBlogHandler)
-				blog.PATCH("/:id", UpdateBlogHandler)
-				blog.DELETE("/:id", DeleteBlogHandler)
+				blog.GET("/", app.GetBlogsHandler)
+				blog.GET("/:id", app.GetBlogHandler)
+				blog.POST("/:id", app.CreateBlogHandler)
+				blog.PATCH("/:id", app.UpdateBlogHandler)
+				blog.DELETE("/:id", app.DeleteBlogHandler)
 			}
 		}
 	}
 
-	router.Run(":8080")
+	err = router.Run(":8080")
+	if err != nil {
+		log.Fatalf("failed to run server: %v", err)
+	}
 }
 
-func LoginHandler(c *gin.Context) {}
+func InitDB() (*gorm.DB, error) {
+	host := os.Getenv("DB_HOST")
+	port := os.Getenv("DB_PORT")
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	dbname := os.Getenv("DB_NAME")
 
-func RegisterHandler(c *gin.Context) {}
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 
-func LogoutHandler(c *gin.Context) {}
+	// create db connection using gorm
+	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{})
+	if err != nil {
+		return nil, err
+	}
 
-func GetProfileHandler(c *gin.Context) {
+	sqlDB, err := db.DB()
+	sqlDB.Ping()
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
+}
+
+func (app *Application) LoginHandler(c *gin.Context) {}
+
+func (app *Application) RegisterHandler(c *gin.Context) {}
+
+func (app *Application) LogoutHandler(c *gin.Context) {}
+
+func (app *Application) GetProfileHandler(c *gin.Context) {
 	userID := c.Param("user_id")
+	id, err := strconv.Atoi(userID)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": "invalid user_id",
+		})
+		return
+	}
 	res := service.NewProfileService(
-		repository.NewUserRepository(),
-	).GetProfile(userID)
+		repository.NewUserRepository(app.db),
+	).GetProfile(id)
 	c.JSON(200, gin.H{
 		"user_id": res,
 	})
 }
 
-func CreateProfileHandler(c *gin.Context) {}
+func (app *Application) UpdateProfileHandler(c *gin.Context) {
+	userID := c.Param("user_id")
+	id, err := strconv.Atoi(userID)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": "invalid user_id",
+		})
+		return
+	}
+	res := service.NewProfileService(
+		repository.NewUserRepository(app.db),
+	).GetProfile(id)
+	c.JSON(200, gin.H{
+		"user_id": res,
+	})
+}
 
-func UpdateProfileHandler(c *gin.Context) {}
+func (app *Application) DeleteProfileHandler(c *gin.Context) {
+	userID := c.Param("user_id")
+	id, err := strconv.Atoi(userID)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": "invalid user_id",
+		})
+		return
+	}
+	res := service.NewProfileService(
+		repository.NewUserRepository(app.db),
+	).GetProfile(id)
+	c.JSON(200, gin.H{
+		"user_id": res,
+	})
+}
 
-func DeleteProfileHandler(c *gin.Context) {}
+func (app *Application) GetBlogsHandler(c *gin.Context) {}
 
-func GetBlogsHandler(c *gin.Context) {}
+func (app *Application) GetBlogHandler(c *gin.Context) {}
 
-func GetBlogHandler(c *gin.Context) {}
+func (app *Application) CreateBlogHandler(c *gin.Context) {}
 
-func CreateBlogHandler(c *gin.Context) {}
+func (app *Application) UpdateBlogHandler(c *gin.Context) {}
 
-func UpdateBlogHandler(c *gin.Context) {}
-
-func DeleteBlogHandler(c *gin.Context) {}
+func (app *Application) DeleteBlogHandler(c *gin.Context) {}
