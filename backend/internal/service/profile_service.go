@@ -18,16 +18,16 @@ func NewProfileService(userRepository repository.UserRepository) *ProfileService
 }
 
 // GetProfile gets a profile.
-func (s *ProfileService) GetProfile(userID int) interface{} {
+func (s *ProfileService) GetProfile(userID int) (*model.User, error) {
 	user, err := s.userRepository.GetUserByID(userID)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return user
+	return user, nil
 }
 
 // UpdateProfile updates a profile.
-func (s *ProfileService) UpdateProfile(user *model.User) error {
+func (s *ProfileService) UpdateProfile(user *model.UpdateUserRequest) error {
 	err := s.userRepository.UpdateUser(user)
 	if err != nil {
 		return err

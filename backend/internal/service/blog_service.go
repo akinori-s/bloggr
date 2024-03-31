@@ -1,6 +1,8 @@
 package service
 
 import (
+	"time"
+
 	"github.com/akinori-s/bloggr/internal/model"
 	"github.com/akinori-s/bloggr/internal/repository"
 )
@@ -37,6 +39,8 @@ func (s *BlogService) GetBlog(id int) (*model.Blog, error) {
 
 // CreateBlog creates a blog.
 func (s *BlogService) CreateBlog(blog *model.Blog) error {
+	blog.CreatedAt = time.Now()
+	blog.UpdatedAt = time.Now()
 	err := s.blogRepository.CreateBlog(blog)
 	if err != nil {
 		return err

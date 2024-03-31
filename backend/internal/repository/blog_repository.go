@@ -29,7 +29,8 @@ func NewBlogRepository(db *gorm.DB) *blogRepository {
 // GetBlogsByUserID gets blogs.
 func (r *blogRepository) GetBlogsByUserID(user_id int) ([]*model.Blog, error) {
 	blogs := []*model.Blog{}
-	if err := r.DB.Where("user_id = ?", user_id).Find(&blogs).Error; err != nil {
+	err := r.DB.Where("user_id = ?", user_id).Find(&blogs).Error
+	if err != nil {
 		return nil, err
 	}
 	return blogs, nil
@@ -38,7 +39,8 @@ func (r *blogRepository) GetBlogsByUserID(user_id int) ([]*model.Blog, error) {
 // GetBlogByID gets a blog by ID.
 func (r *blogRepository) GetBlogByID(id int) (*model.Blog, error) {
 	blog := &model.Blog{}
-	if err := r.DB.First(blog, id).Error; err != nil {
+	err := r.DB.First(blog, id).Error
+	if err != nil {
 		return nil, err
 	}
 	return blog, nil
@@ -46,7 +48,8 @@ func (r *blogRepository) GetBlogByID(id int) (*model.Blog, error) {
 
 // CreateBlog creates a blog.
 func (r *blogRepository) CreateBlog(blog *model.Blog) error {
-	if err := r.DB.Create(blog).Error; err != nil {
+	err := r.DB.Create(blog).Error
+	if err != nil {
 		return err
 	}
 	return nil
@@ -54,7 +57,8 @@ func (r *blogRepository) CreateBlog(blog *model.Blog) error {
 
 // UpdateBlog updates a blog.
 func (r *blogRepository) UpdateBlog(blog *model.Blog) error {
-	if err := r.DB.Save(blog).Error; err != nil {
+	err := r.DB.Save(blog).Error
+	if err != nil {
 		return err
 	}
 	return nil
@@ -62,7 +66,8 @@ func (r *blogRepository) UpdateBlog(blog *model.Blog) error {
 
 // DeleteBlog deletes a blog.
 func (r *blogRepository) DeleteBlog(id int) error {
-	if err := r.DB.Delete(&model.Blog{}, id).Error; err != nil {
+	err := r.DB.Delete(&model.Blog{}, id).Error
+	if err != nil {
 		return err
 	}
 	return nil

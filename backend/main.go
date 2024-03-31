@@ -45,7 +45,7 @@ func main() {
 				profile.PATCH("/", app.UpdateProfileHandler)
 				profile.DELETE("/", app.DeleteProfileHandler)
 			}
-			blog := api.Group("/blog")
+			blog := user.Group("/blog")
 			{
 				blog.GET("/", app.GetBlogsHandler)
 				blog.GET("/:blog_id", app.GetBlogHandler)
@@ -88,7 +88,16 @@ func InitDB() (*gorm.DB, error) {
 
 func (app *Application) LoginHandler(c *gin.Context) {}
 
-func (app *Application) RegisterHandler(c *gin.Context) {}
+func (app *Application) RegisterHandler(c *gin.Context) {
+	user := &model.User{}
+	if err := c.BindJSON(user); err != nil {
+		c.JSON(400, gin.H{
+			"error": "invalid user object in request",
+		})
+		return
+	}
+
+}
 
 func (app *Application) LogoutHandler(c *gin.Context) {}
 
@@ -101,29 +110,44 @@ func (app *Application) GetProfileHandler(c *gin.Context) {
 		})
 		return
 	}
-	res := service.NewProfileService(
+	res, err := service.NewProfileService(
 		repository.NewUserRepository(app.db),
 	).GetProfile(id)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": "failed to get profile",
+		})
+		return
+	}
+	if res == nil {
+		c.JSON(404, gin.H{
+			"error": "profile not found",
+		})
+		return
+	}
 	c.JSON(200, gin.H{
 		"user_id": res,
 	})
 }
 
 func (app *Application) UpdateProfileHandler(c *gin.Context) {
-	userID := c.Param("user_id")
-	id, err := strconv.Atoi(userID)
-	if err != nil {
+	user := &model.UpdateUserRequest{}
+	if err := c.BindJSON(user); err != nil {
 		c.JSON(400, gin.H{
-			"error": "invalid user id",
+			"error": "invalid user object in request",
 		})
 		return
 	}
-	res := service.NewProfileService(
+	err := service.NewProfileService(
 		repository.NewUserRepository(app.db),
-	).GetProfile(id)
-	c.JSON(200, gin.H{
-		"user_id": res,
-	})
+	).UpdateProfile(user)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": "failed to update profile",
+		})
+		return
+	}
+	c.JSON(200, gin.H{})
 }
 
 func (app *Application) DeleteProfileHandler(c *gin.Context) {
@@ -135,12 +159,16 @@ func (app *Application) DeleteProfileHandler(c *gin.Context) {
 		})
 		return
 	}
-	res := service.NewProfileService(
+	err = service.NewProfileService(
 		repository.NewUserRepository(app.db),
-	).GetProfile(id)
-	c.JSON(200, gin.H{
-		"user_id": res,
-	})
+	).DeleteProfile(id)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": "failed to delete profile",
+		})
+		return
+	}
+	c.JSON(200, gin.H{})
 }
 
 func (app *Application) GetBlogsHandler(c *gin.Context) {
@@ -158,6 +186,12 @@ func (app *Application) GetBlogsHandler(c *gin.Context) {
 	if err != nil {
 		c.JSON(500, gin.H{
 			"error": "failed to get blogs",
+		})
+		return
+	}
+	if len(res) == 0 {
+		c.JSON(404, gin.H{
+			"error": "blogs not found",
 		})
 		return
 	}
@@ -181,6 +215,12 @@ func (app *Application) GetBlogHandler(c *gin.Context) {
 	if err != nil {
 		c.JSON(500, gin.H{
 			"error": "failed to get blog",
+		})
+		return
+	}
+	if res == nil {
+		c.JSON(404, gin.H{
+			"error": "blog not found",
 		})
 		return
 	}
