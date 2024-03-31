@@ -5,20 +5,28 @@ import (
 	"gorm.io/gorm"
 )
 
-// UserRepository is a repository for user.
-type UserRepository struct {
+// UserRepository is an interface for user repository.
+type UserRepository interface {
+	GetUserByID(id int) (*model.User, error)
+	CreateUser(user *model.User) error
+	UpdateUser(user *model.User) error
+	DeleteUser(id int) error
+}
+
+// userRepository is a repository for user.
+type userRepository struct {
 	DB *gorm.DB
 }
 
 // NewUserRepository creates a new user repository.
-func NewUserRepository(db *gorm.DB) *UserRepository {
-	return &UserRepository{
+func NewUserRepository(db *gorm.DB) *userRepository {
+	return &userRepository{
 		DB: db,
 	}
 }
 
 // GetUserByID gets a user by ID.
-func (r *UserRepository) GetUserByID(id int) (*model.User, error) {
+func (r *userRepository) GetUserByID(id int) (*model.User, error) {
 	user := &model.User{}
 	if err := r.DB.First(user, id).Error; err != nil {
 		return nil, err
@@ -27,7 +35,7 @@ func (r *UserRepository) GetUserByID(id int) (*model.User, error) {
 }
 
 // CreateUser creates a user.
-func (r *UserRepository) CreateUser(user *model.User) error {
+func (r *userRepository) CreateUser(user *model.User) error {
 	if err := r.DB.Create(user).Error; err != nil {
 		return err
 	}
@@ -35,7 +43,7 @@ func (r *UserRepository) CreateUser(user *model.User) error {
 }
 
 // UpdateUser updates a user.
-func (r *UserRepository) UpdateUser(user *model.User) error {
+func (r *userRepository) UpdateUser(user *model.User) error {
 	if err := r.DB.Save(user).Error; err != nil {
 		return err
 	}
@@ -43,8 +51,8 @@ func (r *UserRepository) UpdateUser(user *model.User) error {
 }
 
 // DeleteUser deletes a user.
-func (r *UserRepository) DeleteUser(user *model.User) error {
-	if err := r.DB.Delete(user).Error; err != nil {
+func (r *userRepository) DeleteUser(id int) error {
+	if err := r.DB.Delete(&model.User{}, id).Error; err != nil {
 		return err
 	}
 	return nil
