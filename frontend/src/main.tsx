@@ -6,7 +6,7 @@ import 'bootstrap-icons/font/bootstrap-icons.min.css';
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('roota')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+	<React.StrictMode>
+		<App />
+	</React.StrictMode>,
 )

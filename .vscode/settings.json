@@ -1,0 +1,13 @@
+{
+	"[typescriptreact]": {
+		"workbench.editor.languageDetection": false,
+		"editor.detectIndentation": false,
+		"editor.tabSize": 2
+	},
+	"[css]": {
+		"editor.detectIndentation": false,
+		"editor.tabSize": 2,
+		"editor.guides.indentation": false,
+		"editor.insertSpaces": false
+	}
+}
