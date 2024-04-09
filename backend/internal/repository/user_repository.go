@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"log"
+
 	"github.com/akinori-s/bloggr/internal/model"
 	"gorm.io/gorm"
 )
@@ -46,7 +48,9 @@ func (r *userRepository) CreateUser(user *model.User) error {
 
 // UpdateUser updates a user.
 func (r *userRepository) UpdateUser(user *model.UpdateUserRequest) error {
-	err := r.DB.Model(&model.UpdateUserRequest{}).Where("id = ?", user.ID).Updates(user).Error
+	r.DB = r.DB.Debug()
+	log.Println(user)
+	err := r.DB.Model(&model.User{}).Where("id = ?", user.ID).Updates(user).Error
 	if err != nil {
 		return err
 	}
