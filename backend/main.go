@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/akinori-s/bloggr/internal/model"
 	"github.com/akinori-s/bloggr/internal/repository"
@@ -22,8 +23,16 @@ type Application struct {
 
 func main() {
 	router := gin.Default()
+	config := cors.DefaultConfig()
 
-	router.Use(cors.Default())
+	config.AllowMethods = []string{"GET", "POST", "PATCH", "DELETE"}
+	config.AllowHeaders = []string{"Origin", "Content-Type", "Accept"}
+	config.ExposeHeaders = []string{"Content-Length"}
+	config.MaxAge = 12 * time.Hour
+
+	config.AllowOrigins = []string{"http://localhost:5173"}
+	config.AllowCredentials = true
+	router.Use(cors.New(config))
 
 	db, err := InitDB()
 	if err != nil {
@@ -96,7 +105,16 @@ func (app *Application) RegisterHandler(c *gin.Context) {
 		})
 		return
 	}
-
+	err := service.NewAuthService(
+		repository.NewUserRepository(app.db),
+	).RegisterUser(user)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": "failed to register user",
+		})
+		return
+	}
+	c.JSON(200, gin.H{})
 }
 
 func (app *Application) LogoutHandler(c *gin.Context) {}
@@ -125,12 +143,18 @@ func (app *Application) GetProfileHandler(c *gin.Context) {
 		})
 		return
 	}
-	c.JSON(200, gin.H{
-		"user_id": res,
-	})
+	c.JSON(200, res)
 }
 
 func (app *Application) UpdateProfileHandler(c *gin.Context) {
+	userID := c.Param("user_id")
+	id, err := strconv.Atoi(userID)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": "invalid user id",
+		})
+		return
+	}
 	user := &model.UpdateUserRequest{}
 	if err := c.BindJSON(user); err != nil {
 		c.JSON(400, gin.H{
@@ -138,7 +162,8 @@ func (app *Application) UpdateProfileHandler(c *gin.Context) {
 		})
 		return
 	}
-	err := service.NewProfileService(
+	user.ID = id
+	err = service.NewProfileService(
 		repository.NewUserRepository(app.db),
 	).UpdateProfile(user)
 	if err != nil {
@@ -230,6 +255,14 @@ func (app *Application) GetBlogHandler(c *gin.Context) {
 }
 
 func (app *Application) CreateBlogHandler(c *gin.Context) {
+	userID := c.Param("user_id")
+	uid, err := strconv.Atoi(userID)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": "invalid blog id",
+		})
+		return
+	}
 	blog := &model.Blog{}
 	if err := c.BindJSON(blog); err != nil {
 		c.JSON(400, gin.H{
@@ -237,8 +270,9 @@ func (app *Application) CreateBlogHandler(c *gin.Context) {
 		})
 		return
 	}
+	blog.UserID = uid
 	// TODO: add a validator
-	err := service.NewBlogService(
+	err = service.NewBlogService(
 		repository.NewBlogRepository(app.db),
 	).CreateBlog(blog)
 	if err != nil {
