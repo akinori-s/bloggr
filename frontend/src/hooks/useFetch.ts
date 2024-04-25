@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { StatusError } from '../types/apiTypes';
 
 var BASE_URL: string = 'http://localhost:8080/api';
 
@@ -9,7 +10,7 @@ interface FetchOptions<T> {
 
 interface FetchResult<T> {
 	data: T | null;
-	error: string | null;
+	error: StatusError | null;
 	loading: boolean;
 }
 
@@ -19,7 +20,7 @@ function useFetch<T, U = undefined>(
 	options?: FetchOptions<U>
 ): FetchResult<T> {
 	const [data, setData] = useState<T | null>(null);
-	const [error, setError] = useState<string | null>(null);
+	const [error, setError] = useState<StatusError | null>(null);
 	const [loading, setLoading] = useState<boolean>(true);
 	url = BASE_URL.concat(url, '/');
 	console.log(url);
@@ -39,13 +40,17 @@ function useFetch<T, U = undefined>(
 				};
 				const response = await fetch(url, requestOptions);
 				if (!response.ok) {
-					throw new Error(`An error occurred: ${response.statusText}`);
+					const error = new StatusError(`${response.statusText}`);
+					error.status = response.status;
+					throw error;
 				}
 				const jsonData: T = await response.json();
 				setData(jsonData);
-				// console.log(jsonData);
-			} catch (error) {
-				setError(error instanceof Error ? error.message : 'An unknown error occurred');
+			} catch (error : any | Error) {
+				if (!(error instanceof StatusError)) {
+					error.message = 'An unknown error occurred';
+				}
+				setError(error);
 			} finally {
 				setLoading(false);
 			}

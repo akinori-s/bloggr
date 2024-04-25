@@ -10,7 +10,7 @@ type Blog struct {
 	Title     string    `gorm:"title" json:"title" validate:"required, min=1, max=255"`
 	Content   string    `gorm:"content" json:"content" validate:"required, max=10000"`
 	UserID    int       `gorm:"user_id" json:"user_id" validate:"required, min=0"`
-	CreatedAt time.Time `gorm:"created_at"`
+	CreatedAt time.Time `gorm:"created_at" json:"created_at"`
 	UpdatedAt time.Time `gorm:"updated_at"`
 }
 

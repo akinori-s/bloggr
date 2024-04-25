@@ -7,3 +7,14 @@ export interface User {
 	blog_subtitle: string;
 	blog_color_theme_id: string;
 }
+
+export interface Blogs {
+	id: number;
+	title: string;
+	content: string;
+	created_at: Date;
+}
+
+export class StatusError extends Error {
+	status: number | undefined;
+}

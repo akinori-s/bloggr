@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -131,15 +132,15 @@ func (app *Application) GetProfileHandler(c *gin.Context) {
 	res, err := service.NewProfileService(
 		repository.NewUserRepository(app.db),
 	).GetProfile(id)
-	if err != nil {
-		c.JSON(500, gin.H{
-			"error": "failed to get profile",
+	if res == nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		c.JSON(404, gin.H{
+			"error": "profile not found",
 		})
 		return
 	}
-	if res == nil {
-		c.JSON(404, gin.H{
-			"error": "profile not found",
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": "failed to get profile",
 		})
 		return
 	}
@@ -220,9 +221,7 @@ func (app *Application) GetBlogsHandler(c *gin.Context) {
 		})
 		return
 	}
-	c.JSON(200, gin.H{
-		"user_id": res,
-	})
+	c.JSON(200, res)
 }
 
 func (app *Application) GetBlogHandler(c *gin.Context) {
