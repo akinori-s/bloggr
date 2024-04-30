@@ -4,6 +4,14 @@ import useFetch from '../hooks/useFetch'
 import { User, Blogs } from '../types/apiTypes'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import ErrorPage from './error'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 
 function NewBlog() {
 
@@ -105,6 +113,21 @@ function NewBlog() {
 			</div>
 
 			<main className='container py-5'>
+        <Breadcrumb className='mb-4'>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">Home</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href={`/profile/${userId}`}>{userData?.blog_title}</BreadcrumbLink>
+            </BreadcrumbItem> 
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{title === '' ? 'New blog' : title}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 				<div className="flex pb-3 item-center h-16">
           <input
             type="text"

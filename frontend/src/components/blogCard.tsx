@@ -78,7 +78,7 @@ const BlogCard: React.FC<BlogCardProps> = ({id, title, subtitle, datetimePublish
               <DropdownMenuItem>
                 Edit
               </DropdownMenuItem>
-              <DropdownMenuItem className="focus:bg-[#dc3545] focus:text-white dark:focus:text-white  ">
+              <DropdownMenuItem className="focus:text-white focus:bg-red-500 dark:bg-red-900 dark:focus:text-white dark:focus:bg-red-900">
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>

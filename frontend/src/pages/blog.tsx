@@ -4,6 +4,14 @@ import useFetch from '../hooks/useFetch'
 import { User, Blogs } from '../types/apiTypes'
 import { useParams, Link } from 'react-router-dom'
 import ErrorPage from './error'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 
 function Blog() {
 
@@ -131,6 +139,23 @@ function Blog() {
 			</div>
 
 			<main className='container py-5'>
+        <Breadcrumb className='mb-4'>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <Link to={`/`}></Link>
+              <BreadcrumbLink href="/">Home</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <Link to={`/profile/${userId}`}></Link>
+              <BreadcrumbLink href={`/profile/${userId}`}>{userData?.blog_title}</BreadcrumbLink>
+            </BreadcrumbItem> 
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{title}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 				<div className="flex pb-3 item-center">
 					{editMode ? (
 						<input
