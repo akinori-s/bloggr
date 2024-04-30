@@ -1,10 +1,20 @@
 import React from "react"
 import { Link } from "react-router-dom";
 import {
-	HoverCard,
-	HoverCardContent,
-	HoverCardTrigger,
-} from "@/components/ui/hover-card"
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  Button,
+} from "@/components/ui/button"
 
 interface BlogCardProps {
   id: number,
@@ -27,7 +37,7 @@ const BlogCard: React.FC<BlogCardProps> = ({id, title, subtitle, datetimePublish
 		const hours = Math.round(minutes / 60);
 		const days = Math.round(hours / 24);
 		const months = Math.round(days / 30);
-		const years = Math.round(months / 12);	
+		const years = Math.round(months / 12);
 		const rtf = new Intl.RelativeTimeFormat('jp', { numeric: 'auto' });
 
 		if (seconds < 60) {
@@ -50,16 +60,29 @@ const BlogCard: React.FC<BlogCardProps> = ({id, title, subtitle, datetimePublish
 			<div className='flex flex-col w-full gap-2'>
 				<div className='flex items-center text-lg'>
 					<div className='font-semibold'>{title}</div>
-					<HoverCard>
-							<HoverCardTrigger asChild>
-						<div className='ml-auto text-xs text-foreground'>{timeAgo(datetimePublished)}</div>
-						</HoverCardTrigger>
-						<HoverCardContent className="px-3 py-1 m-0 w-auto">
-						<span className="text-xs">
-							{datetimePublished?.toLocaleTimeString() + ', ' + datetimePublished?.toDateString()}
-						</span>
-						</HoverCardContent>
-					</HoverCard>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger className="ml-auto text-xs">{timeAgo(datetimePublished)}</TooltipTrigger>
+              <TooltipContent>
+                <p>{datetimePublished?.toLocaleTimeString() + ', ' + datetimePublished?.toDateString()}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="ml-2">
+                <i className="bi bi-three-dots-vertical text-gray-400 text-lg"></i>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuItem>
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem className="focus:bg-[#dc3545] focus:text-white dark:focus:text-white  ">
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 				</div>
 				<div className='line-clamp-2 text-md font-medium h-12'>{subtitle}</div>
 				<div className='text-md font-medium text-right'><Link to={`blog/${id}`}>Read more...</Link></div>

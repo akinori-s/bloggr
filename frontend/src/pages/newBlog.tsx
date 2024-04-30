@@ -2,14 +2,15 @@ import '../App.css'
 import { useState } from 'react';
 import useFetch from '../hooks/useFetch'
 import { User, Blogs } from '../types/apiTypes'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import ErrorPage from './error'
 
 function NewBlog() {
 
-	const { userId, blogId } = useParams();
+	const { userId } = useParams();
 	const [title, setTitle] = useState('');
 	const [content, setContent] = useState('');
+  const navigate = useNavigate();
 
 	// Fetch user data
 	const {
@@ -42,10 +43,10 @@ function NewBlog() {
 	};
 
 	const handleSave = () => {
-    // Save changes
-    setTitle(title);
-    setContent(content);
-    console.log('Save changes');
+    if (title === '' || content === '') {
+      alert('Title and content cannot be empty.');
+      return;
+    }
 
     const requestOptions: RequestInit = {
       method: 'POST',
@@ -68,6 +69,7 @@ function NewBlog() {
       }
     }
     execPost();
+    navigate(`/profile/${userId}`);
 	}
 
 	return (
@@ -112,7 +114,7 @@ function NewBlog() {
             placeholder={'Title '}
             className="form-control text-2xl fw-bold text-body-emphasis"
           />
-          <Link to={`/profile/${userId}`}><button type="button" className="btn btn-primary ml-2 h-full" onClick={handleSave}>Save</button></Link>
+          <button type="button" className="btn btn-primary ml-2 h-full" onClick={handleSave}>Save</button>
           <Link to={`/profile/${userId}`}><button type="button" className="btn btn-secondary ml-2 h-full">Cancel</button></Link>
 				</div>
         <textarea
