@@ -20,10 +20,11 @@ interface BlogCardProps {
   id: number,
 	title: string,
 	subtitle: string,
-	datetimePublished: Date
+	datetimePublished: Date,
+  handleDelete: (id: number) => void;
 }
 
-const BlogCard: React.FC<BlogCardProps> = ({id, title, subtitle, datetimePublished}) => {
+const BlogCard: React.FC<BlogCardProps> = ({id, title, subtitle, datetimePublished, handleDelete}) => {
 	const timeAgo = (date: Date) => {
 		if (date  === undefined || date === null) {
 			return "...";
@@ -78,7 +79,10 @@ const BlogCard: React.FC<BlogCardProps> = ({id, title, subtitle, datetimePublish
               <DropdownMenuItem>
                 Edit
               </DropdownMenuItem>
-              <DropdownMenuItem className="focus:text-white focus:bg-red-500 dark:bg-red-900 dark:focus:text-white dark:focus:bg-red-900">
+              <DropdownMenuItem
+                className="focus:text-white focus:bg-red-500 dark:bg-red-900 dark:focus:text-white dark:focus:bg-red-900"
+                onClick={() => handleDelete(id)}
+              >
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>

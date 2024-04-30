@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { StatusError } from '../types/apiTypes';
 
 const BASE_URL: string = 'http://localhost:8080/api';
@@ -12,6 +12,7 @@ interface FetchResult<T> {
 	data: T | null;
 	error: StatusError | null;
 	loading: boolean;
+	fetchData: () => void;
 }
 
 function useFetch<T, U = undefined>(
@@ -25,7 +26,7 @@ function useFetch<T, U = undefined>(
 	url = BASE_URL.concat(url, '/');
 	console.log(url);
 
-	useEffect(() => {
+	const fetchData = useCallback(() => {
 		const fetchData = async () => {
 			setLoading(true);
 			try {
@@ -60,7 +61,11 @@ function useFetch<T, U = undefined>(
 	// Ensure the effect is re-run if url or options change
 	}, [url, JSON.stringify(options)]);
 
-	return { data, error, loading };
+	useEffect(() => {
+		fetchData();
+	}, []);
+
+	return { data, error, loading, fetchData };
 }
 
-export default useFetch;	
+export default useFetch;

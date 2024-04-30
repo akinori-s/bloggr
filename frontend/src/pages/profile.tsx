@@ -23,6 +23,7 @@ function Profile() {
 		data: blogData,
 		loading: blogLoading,
 		error: blogError,
+    fetchData: blogsRefetch,
 	} = useFetch<Blogs[]>(`/${userId}/blog`, 'GET');
 
 	if (userLoading) return <div>Loading...</div>;
@@ -42,8 +43,30 @@ function Profile() {
 			return <EmptyBlogsPlaceholder/>;
 		}
 		return blogData?.map((blog) => (
-			<BlogCard key={blog.id} id={blog.id} title={blog.title} subtitle={blog.content} datetimePublished={blog.created_at} />
+			<BlogCard key={blog.id} id={blog.id} title={blog.title} subtitle={blog.content} datetimePublished={blog.created_at} handleDelete={handleDelete}/>
 		))
+	}
+
+  const handleDelete = (id: number) => {
+    const deleteRequestOptions: RequestInit = {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include'
+    };
+
+    const BASE_URL: string = 'http://localhost:8080/api';
+    const execDelete = async () => {
+      try {
+        await fetch(BASE_URL.concat(`/${userId}/blog/${id}`, '/'), deleteRequestOptions);
+      } catch (error: any | Error) {
+        alert('Failed to delete blog.');
+        return ;
+      }
+      blogsRefetch();
+    }
+    execDelete();
 	}
 
 	return (
