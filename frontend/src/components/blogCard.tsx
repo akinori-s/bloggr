@@ -1,18 +1,19 @@
 import React from "react"
+import { Link } from "react-router-dom";
 import {
 	HoverCard,
 	HoverCardContent,
 	HoverCardTrigger,
 } from "@/components/ui/hover-card"
-import { CornerDownLeft } from "lucide-react";
 
 interface BlogCardProps {
+  id: number,
 	title: string,
 	subtitle: string,
 	datetimePublished: Date
 }
 
-const BlogCard: React.FC<BlogCardProps> = ({title, subtitle, datetimePublished}) => {
+const BlogCard: React.FC<BlogCardProps> = ({id, title, subtitle, datetimePublished}) => {
 	const timeAgo = (date: Date) => {
 		if (date  === undefined || date === null) {
 			return "...";
@@ -28,7 +29,7 @@ const BlogCard: React.FC<BlogCardProps> = ({title, subtitle, datetimePublished})
 		const months = Math.round(days / 30);
 		const years = Math.round(months / 12);	
 		const rtf = new Intl.RelativeTimeFormat('jp', { numeric: 'auto' });
-	
+
 		if (seconds < 60) {
 			return rtf.format(-seconds, 'second');
 		} else if (minutes < 60) {
@@ -61,7 +62,7 @@ const BlogCard: React.FC<BlogCardProps> = ({title, subtitle, datetimePublished})
 					</HoverCard>
 				</div>
 				<div className='line-clamp-2 text-md font-medium h-12'>{subtitle}</div>
-				<div className='text-md font-medium text-right'>Read more...</div>
+				<div className='text-md font-medium text-right'><Link to={`blog/${id}`}>Read more...</Link></div>
 			</div>
 		</div>
 	);

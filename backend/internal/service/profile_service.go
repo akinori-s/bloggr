@@ -17,6 +17,15 @@ func NewProfileService(userRepository repository.UserRepository) *ProfileService
 	}
 }
 
+// GetProfiles gets the first 10 profiles randomly.
+func (s *ProfileService) GetProfiles() ([]*model.User, error) {
+	user, err := s.userRepository.GetUsers()
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
 // GetProfile gets a profile.
 func (s *ProfileService) GetProfile(userID int) (*model.User, error) {
 	user, err := s.userRepository.GetUserByID(userID)

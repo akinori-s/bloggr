@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { StatusError } from '../types/apiTypes';
 
-var BASE_URL: string = 'http://localhost:8080/api';
+const BASE_URL: string = 'http://localhost:8080/api';
 
 interface FetchOptions<T> {
 	body?: T;

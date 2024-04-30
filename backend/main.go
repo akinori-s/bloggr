@@ -25,13 +25,10 @@ type Application struct {
 func main() {
 	router := gin.Default()
 	config := cors.DefaultConfig()
-
-	config.AllowMethods = []string{"GET", "POST", "PATCH", "DELETE"}
-	config.AllowHeaders = []string{"Origin", "Content-Type", "Accept"}
-	config.ExposeHeaders = []string{"Content-Length"}
+	config.AllowOrigins = []string{
+		"http://localhost:5173",
+	}
 	config.MaxAge = 12 * time.Hour
-
-	config.AllowOrigins = []string{"http://localhost:5173"}
 	config.AllowCredentials = true
 	router.Use(cors.New(config))
 
@@ -47,6 +44,11 @@ func main() {
 		api.POST("/register", app.RegisterHandler)
 		api.POST("/logout", app.LogoutHandler)
 
+		profiles := api.Group("/profiles")
+		{
+			profiles.GET("/", app.GetProfilesHandler)
+		}
+
 		user := api.Group("/:user_id")
 		{
 			profile := user.Group("/profile")
@@ -58,10 +60,10 @@ func main() {
 			blog := user.Group("/blog")
 			{
 				blog.GET("/", app.GetBlogsHandler)
-				blog.GET("/:blog_id", app.GetBlogHandler)
+				blog.GET("/:blog_id/", app.GetBlogHandler)
 				blog.POST("/", app.CreateBlogHandler)
 				blog.PATCH("/", app.UpdateBlogHandler)
-				blog.DELETE("/:blog_id", app.DeleteBlogHandler)
+				blog.DELETE("/:blog_id/", app.DeleteBlogHandler)
 			}
 		}
 	}
@@ -119,6 +121,25 @@ func (app *Application) RegisterHandler(c *gin.Context) {
 }
 
 func (app *Application) LogoutHandler(c *gin.Context) {}
+
+func (app *Application) GetProfilesHandler(c *gin.Context) {
+	res, err := service.NewProfileService(
+		repository.NewUserRepository(app.db),
+	).GetProfiles()
+	if res == nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		c.JSON(404, gin.H{
+			"error": "not profiles found",
+		})
+		return
+	}
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": "failed to get profiles",
+		})
+		return
+	}
+	c.JSON(200, res)
+}
 
 func (app *Application) GetProfileHandler(c *gin.Context) {
 	userID := c.Param("user_id")
@@ -248,9 +269,7 @@ func (app *Application) GetBlogHandler(c *gin.Context) {
 		})
 		return
 	}
-	c.JSON(200, gin.H{
-		"user_id": res,
-	})
+	c.JSON(200, res)
 }
 
 func (app *Application) CreateBlogHandler(c *gin.Context) {

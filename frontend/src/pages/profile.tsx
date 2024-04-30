@@ -4,51 +4,45 @@ import useFetch from '../hooks/useFetch'
 import { User, Blogs } from '../types/apiTypes'
 import BlogCard from '../components/blogCard'
 import EmptyBlogsPlaceholder from '../components/emptyBlogsPlaceholder'
-import { useLocation, useParams } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import ErrorPage from './error'
 
 function Profile() {
 
-	const location = useLocation();
 	const { userId } = useParams();
 
-  // Fetch user data
-  const {
+	// Fetch user data
+	const {
 		data: userData,
-    loading: userLoading,
-    error: userError,
-  } = useFetch<User>(`/${userId}/profile`, 'GET');
+		loading: userLoading,
+		error: userError,
+	} = useFetch<User>(`/${userId}/profile`, 'GET');
 
-  // Fetch user's posts
-  const {
+	// Fetch user's posts
+	const {
 		data: blogData,
-    loading: blogLoading,
-    error: blogError,
-  } = useFetch<Blogs[]>(`/${userId}/blog`, 'GET');
+		loading: blogLoading,
+		error: blogError,
+	} = useFetch<Blogs[]>(`/${userId}/blog`, 'GET');
 
 	if (userLoading) return <div>Loading...</div>;
 	if (userError) {
-		console.log("status", userError.status);
 		if (userError.status === 404) return <ErrorPage />;
 		return <div>Error: {userError.message}</div>;
 	}
-	// if (blogLoading) return <div>Loading...</div>;
-	// if (blogError) return <div>Error: {blogError.message}</div>;
 
 	const displayBlogs = () => {
-		console.log(blogData);
 		if (blogLoading) {
 			return <div>Loading...</div>;
 		}
 		if (blogError) {
-			return <EmptyBlogsPlaceholder/>;
-			// return <div>Error: {blogError.message}</div>;
+			return <div>Error...</div>;
 		}
 		if (blogData?.length === 0 || blogData === undefined || blogData === null) {
 			return <EmptyBlogsPlaceholder/>;
 		}
 		return blogData?.map((blog) => (
-			<BlogCard key={blog.id} title={blog.title} subtitle={blog.content} datetimePublished={blog.created_at} />
+			<BlogCard key={blog.id} id={blog.id} title={blog.title} subtitle={blog.content} datetimePublished={blog.created_at} />
 		))
 	}
 
@@ -57,15 +51,12 @@ function Profile() {
 			<header className="p-3 bg-dark">
 				<div className="container">
 					<div className="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-						<a href="/" className='d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none'>
+						<Link to="/" className='d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none'>
 							<i className="bi bi-bootstrap me-3 text-2xl tracking-wide">loggr</i>
-						</a>
+						</Link>
 						<ul className='nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0'>
-							<li><a href="#" className="nav-link px-2 text-white">Home</a></li>
-							<li><a href="#" className="nav-link px-2 text-white">Features</a></li>
-							<li><a href="#" className="nav-link px-2 text-white">{userData?.username}</a></li>
-							<li><a href="#" className="nav-link px-2 text-white">{location.pathname}</a></li>
-							<li><a href="#" className="nav-link px-2 text-white">{userId}</a></li>
+						  <li><Link to="/" className="nav-link px-2 text-white">Home</Link></li>
+							<li><Link to="/features" className="nav-link px-2 text-white">Features</Link></li>
 						</ul>
 						<div className="text-end">
 							<button type="button" className="btn btn-outline-light me-2">Login</button>
@@ -88,7 +79,7 @@ function Profile() {
 			<main className='container py-5'>
 				<div className="flex pb-3 item-center">
 					<h1 className='text-2xl fw-bold text-body-emphasis'>Articles</h1>
-					<button type="button" className="btn btn-primary ml-auto">New blog</button>
+					<Link to={`blog/-1`} className="btn btn-primary ml-auto">New blog</Link>
 				</div>
 				<div className='grid sm:grid-cols-1 xl:grid-cols-2 gap-3'>
 					{displayBlogs()}

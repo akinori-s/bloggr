@@ -9,6 +9,7 @@ import (
 
 // UserRepository is an interface for user repository.
 type UserRepository interface {
+	GetUsers() ([]*model.User, error)
 	GetUserByID(id int) (*model.User, error)
 	CreateUser(user *model.User) error
 	UpdateUser(user *model.UpdateUserRequest) error
@@ -25,6 +26,16 @@ func NewUserRepository(db *gorm.DB) *userRepository {
 	return &userRepository{
 		DB: db,
 	}
+}
+
+// GetUsers randomly gets the first 10 users.
+func (r *userRepository) GetUsers() ([]*model.User, error) {
+	user := []*model.User{}
+	err := r.DB.Limit(10).Find(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 // GetUserByID gets a user by ID.
